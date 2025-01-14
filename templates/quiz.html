@@ -53,6 +53,10 @@
             socket.on('compare_scores', function(scores) {
                 window.location.href = `/result?scores=${JSON.stringify(scores)}`;
             });
+
+            socket.on('start_game', function() {
+                window.location.href = '/quiz';
+            });
         });
     </script>
 </body>

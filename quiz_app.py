@@ -9,6 +9,8 @@ app = Flask(__name__)
 Material(app)
 socketio = SocketIO(app)
 
+players = []  # List to track joined players
+
 def fetch_questions():
     response = requests.get('https://opentdb.com/api.php?amount=10&type=multiple')
     data = response.json()
@@ -18,7 +20,10 @@ def fetch_questions():
 def get_user_name():
     if request.method == 'POST':
         name = request.form['name']
-        return redirect(f'/quiz?name={name}')
+        players.append(name)
+        if len(players) >= 2:
+            socketio.emit('start_game')
+        return render_template('wait.html', name=name)
     return render_template('index.html')
 
 @app.route('/quiz', methods=['GET', 'POST'])
@@ -37,7 +42,11 @@ def ask_questions():
 
 @socketio.on('join')
 def handle_join(data):
-    emit('player_joined', data, broadcast=True)
+    players.append(data['name'])
+    if len(players) >= 2:
+        emit('start_game', broadcast=True)
+    else:
+        emit('player_joined', data, broadcast=True)
 
 @socketio.on('submit_answers')
 def handle_submit_answers(data):
