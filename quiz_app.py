@@ -3,6 +3,7 @@ import random
 from flask import Flask, render_template, request, redirect
 from flask_material import Material
 from flask_socketio import SocketIO, emit
+import os
 
 app = Flask(__name__)
 Material(app)
@@ -44,7 +45,7 @@ def handle_submit_answers(data):
     emit('compare_scores', player_scores, broadcast=True)
 
 def main():
-    socketio.run(app, debug=True)
+    socketio.run(app, host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True)
 
 if __name__ == "__main__":
     main()
