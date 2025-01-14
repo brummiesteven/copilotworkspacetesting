@@ -4,22 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </head>
 <body>
-    <h1>Quiz</h1>
-    <form action="/quiz" method="POST">
-        {% for question in questions %}
-            <div>
-                <p>{{ question.question }}</p>
-                {% for option in question.incorrect_answers %}
-                    <input type="radio" id="{{ option }}" name="answers" value="{{ option }}">
-                    <label for="{{ option }}">{{ option }}</label><br>
-                {% endfor %}
-                <input type="radio" id="{{ question.correct_answer }}" name="answers" value="{{ question.correct_answer }}">
-                <label for="{{ question.correct_answer }}">{{ question.correct_answer }}</label><br>
-            </div>
-        {% endfor %}
-        <button type="submit">Submit Answers</button>
-    </form>
+    <div class="container">
+        <h1 class="center-align">Quiz</h1>
+        <form action="/quiz" method="POST">
+            {% for question in questions %}
+                <div class="card-panel">
+                    <p>{{ question.question }}</p>
+                    {% for option in question.incorrect_answers %}
+                        <p>
+                            <label>
+                                <input type="radio" name="answers" value="{{ option }}">
+                                <span>{{ option }}</span>
+                            </label>
+                        </p>
+                    {% endfor %}
+                    <p>
+                        <label>
+                            <input type="radio" name="answers" value="{{ question.correct_answer }}">
+                            <span>{{ question.correct_answer }}</span>
+                        </label>
+                    </p>
+                </div>
+            {% endfor %}
+            <button class="btn waves-effect waves-light" type="submit">Submit Answers</button>
+        </form>
+    </div>
 </body>
 </html>
