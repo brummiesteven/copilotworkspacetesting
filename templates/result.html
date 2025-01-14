@@ -11,12 +11,7 @@
 <body>
     <div class="container">
         <h1 class="center-align">Quiz Result</h1>
-        <div class="card-panel teal lighten-2">
-            <span class="white-text">Player 1 scored <span id="player1-score"></span> out of 10.</span>
-        </div>
-        <div class="card-panel teal lighten-2">
-            <span class="white-text">Player 2 scored <span id="player2-score"></span> out of 10.</span>
-        </div>
+        <div id="scores-container"></div>
         <div class="card-panel teal lighten-2">
             <span class="white-text" id="result-message"></span>
         </div>
@@ -26,16 +21,31 @@
             const socket = io();
 
             socket.on('compare_scores', function(scores) {
-                document.getElementById('player1-score').textContent = scores.player1;
-                document.getElementById('player2-score').textContent = scores.player2;
+                const scoresContainer = document.getElementById('scores-container');
+                scoresContainer.innerHTML = '';
+
+                let highestScore = -1;
+                let winners = [];
+
+                scores.forEach((score, index) => {
+                    const playerScore = document.createElement('div');
+                    playerScore.className = 'card-panel teal lighten-2';
+                    playerScore.innerHTML = `<span class="white-text">Player ${index + 1} scored ${score} out of 10.</span>`;
+                    scoresContainer.appendChild(playerScore);
+
+                    if (score > highestScore) {
+                        highestScore = score;
+                        winners = [index + 1];
+                    } else if (score === highestScore) {
+                        winners.push(index + 1);
+                    }
+                });
 
                 let resultMessage = '';
-                if (scores.player1 > scores.player2) {
-                    resultMessage = 'Player 1 wins!';
-                } else if (scores.player1 < scores.player2) {
-                    resultMessage = 'Player 2 wins!';
+                if (winners.length === 1) {
+                    resultMessage = `Player ${winners[0]} wins!`;
                 } else {
-                    resultMessage = 'It\'s a tie!';
+                    resultMessage = `It's a tie between players ${winners.join(' and ')}!`;
                 }
                 document.getElementById('result-message').textContent = resultMessage;
             });
