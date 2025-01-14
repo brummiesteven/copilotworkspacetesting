@@ -1,34 +1,36 @@
 import requests
 import random
+from flask import Flask, render_template, request, redirect
+
+app = Flask(__name__)
 
 def fetch_questions():
     response = requests.get('https://opentdb.com/api.php?amount=10&type=multiple')
     data = response.json()
     return data['results']
 
+@app.route('/', methods=['GET', 'POST'])
 def get_user_name():
-    name = input("Enter your name: ")
-    print(f"Welcome, {name}!")
-    return name
+    if request.method == 'POST':
+        name = request.form['name']
+        return redirect(f'/quiz?name={name}')
+    return render_template('index.html')
 
-def ask_questions(questions):
-    score = 0
-    for i, question in enumerate(questions):
-        print(f"Question {i+1}: {question['question']}")
-        options = question['incorrect_answers'] + [question['correct_answer']]
-        random.shuffle(options)
-        for j, option in enumerate(options):
-            print(f"{j+1}. {option}")
-        answer = int(input("Your answer (1-4): "))
-        if options[answer-1] == question['correct_answer']:
-            score += 1
-    return score
+@app.route('/quiz', methods=['GET', 'POST'])
+def ask_questions():
+    if request.method == 'POST':
+        answers = request.form.getlist('answers')
+        questions = fetch_questions()
+        score = 0
+        for i, question in enumerate(questions):
+            if question['correct_answer'] == answers[i]:
+                score += 1
+        return render_template('result.html', score=score)
+    questions = fetch_questions()
+    return render_template('quiz.html', questions=questions)
 
 def main():
-    user_name = get_user_name()
-    questions = fetch_questions()
-    score = ask_questions(questions)
-    print(f"{user_name}, your score is {score}/10")
+    app.run(debug=True)
 
 if __name__ == "__main__":
     main()
