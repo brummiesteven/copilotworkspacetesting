@@ -6,25 +6,26 @@
     <title>Quiz</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
 </head>
 <body>
     <div class="container">
         <h1 class="center-align">Quiz</h1>
-        <form action="/quiz" method="POST">
+        <form id="quiz-form">
             {% for question in questions %}
                 <div class="card-panel">
                     <p>{{ question.question }}</p>
                     {% for option in question.incorrect_answers %}
                         <p>
                             <label>
-                                <input type="radio" name="answers" value="{{ option }}">
+                                <input type="radio" name="answers_{{ loop.index }}" value="{{ option }}">
                                 <span>{{ option }}</span>
                             </label>
                         </p>
                     {% endfor %}
                     <p>
                         <label>
-                            <input type="radio" name="answers" value="{{ question.correct_answer }}">
+                            <input type="radio" name="answers_{{ loop.index }}" value="{{ question.correct_answer }}">
                             <span>{{ question.correct_answer }}</span>
                         </label>
                     </p>
@@ -33,5 +34,26 @@
             <button class="btn waves-effect waves-light" type="submit">Submit Answers</button>
         </form>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const socket = io();
+
+            document.getElementById('quiz-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const answers = [];
+                for (let i = 1; i <= {{ questions|length }}; i++) {
+                    const answer = document.querySelector(`input[name="answers_${i}"]:checked`);
+                    if (answer) {
+                        answers.push(answer.value);
+                    }
+                }
+                socket.emit('submit_answers', { answers });
+            });
+
+            socket.on('compare_scores', function(scores) {
+                window.location.href = `/result?scores=${JSON.stringify(scores)}`;
+            });
+        });
+    </script>
 </body>
 </html>

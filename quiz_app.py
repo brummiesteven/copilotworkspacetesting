@@ -2,9 +2,11 @@ import requests
 import random
 from flask import Flask, render_template, request, redirect
 from flask_material import Material
+from flask_socketio import SocketIO, emit
 
 app = Flask(__name__)
 Material(app)
+socketio = SocketIO(app)
 
 def fetch_questions():
     response = requests.get('https://opentdb.com/api.php?amount=10&type=multiple')
@@ -32,8 +34,17 @@ def ask_questions():
     questions = fetch_questions()
     return render_template('quiz.html', questions=questions)
 
+@socketio.on('join')
+def handle_join(data):
+    emit('player_joined', data, broadcast=True)
+
+@socketio.on('submit_answers')
+def handle_submit_answers(data):
+    player_scores = data['scores']
+    emit('compare_scores', player_scores, broadcast=True)
+
 def main():
-    app.run(debug=True)
+    socketio.run(app, debug=True)
 
 if __name__ == "__main__":
     main()
