@@ -6,13 +6,40 @@
     <title>Quiz Result</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
 </head>
 <body>
     <div class="container">
-        <h1 class="center-align">Your Score</h1>
+        <h1 class="center-align">Quiz Result</h1>
         <div class="card-panel teal lighten-2">
-            <span class="white-text">You scored {{ score }} out of 10.</span>
+            <span class="white-text">Player 1 scored <span id="player1-score"></span> out of 10.</span>
+        </div>
+        <div class="card-panel teal lighten-2">
+            <span class="white-text">Player 2 scored <span id="player2-score"></span> out of 10.</span>
+        </div>
+        <div class="card-panel teal lighten-2">
+            <span class="white-text" id="result-message"></span>
         </div>
     </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const socket = io();
+
+            socket.on('compare_scores', function(scores) {
+                document.getElementById('player1-score').textContent = scores.player1;
+                document.getElementById('player2-score').textContent = scores.player2;
+
+                let resultMessage = '';
+                if (scores.player1 > scores.player2) {
+                    resultMessage = 'Player 1 wins!';
+                } else if (scores.player1 < scores.player2) {
+                    resultMessage = 'Player 2 wins!';
+                } else {
+                    resultMessage = 'It\'s a tie!';
+                }
+                document.getElementById('result-message').textContent = resultMessage;
+            });
+        });
+    </script>
 </body>
 </html>

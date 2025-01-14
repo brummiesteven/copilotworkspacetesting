@@ -1,0 +1,4 @@
+flask
+flask_material
+flask_socketio
+requests
